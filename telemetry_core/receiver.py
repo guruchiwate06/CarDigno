@@ -17,6 +17,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from telemetry_core.decoder import OBD2Decoder
 from telemetry_core.db_logger import TelemetryLogger
+try:
+    from telemetry_core.config import settings
+except ImportError:
+    settings = None
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,15 +38,15 @@ class TelemetryReceiver:
 
     def __init__(
         self,
-        host: str = "127.0.0.1",
-        port: int = 8000,
-        batch_size: int = 10,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        batch_size: Optional[int] = None,
         db_path: Optional[str] = None,
         on_record_callback: Optional[Callable[[Dict[str, Any]], None]] = None
     ):
-        self.host = host
-        self.port = port
-        self.batch_size = batch_size
+        self.host = host or (settings.SIM_HOST if settings else "127.0.0.1")
+        self.port = port or (settings.SIM_PORT if settings else 8000)
+        self.batch_size = batch_size or (settings.BATCH_SIZE if settings else 10)
         self.db_logger = TelemetryLogger(db_path=db_path)
         self.on_record_callback = on_record_callback
         

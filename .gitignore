@@ -3,29 +3,69 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.egg-info/
+dist/
+build/
 
-# Environments
+# Virtual environments
 .env
+.env.*
+!.env.example
 .venv
+.venv*/
 env/
 venv/
 ENV/
 
-# Database files
+# Database files & SQLite WAL journals
 database/*.db
 database/*.db-wal
 database/*.db-shm
+*.sqlite
+*.sqlite3
 *.db
 *.db-wal
 *.db-shm
 
-# IDE & OS
+# Secrets, credentials & certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+credentials.json
+*service-account*.json
+id_rsa*
+*.pub
+
+# Logs & runtime artifacts
+*.log
+logs/
+*.out
+*.pid
+
+# ML Models & serialized checkpoints (local cache)
+*.pkl
+*.joblib
+*.h5
+*.onnx
+
+# IDE & Editor metadata
 .vscode/
 .idea/
+.cursor/
+*.swp
+*.swo
+*~
+
+# Operating System files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Test & coverage
+# Test & coverage reports
 .coverage
 htmlcov/
 .pytest_cache/
+.tox/

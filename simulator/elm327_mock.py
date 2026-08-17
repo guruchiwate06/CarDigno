@@ -7,10 +7,11 @@ import asyncio
 import argparse
 import logging
 import math
+import os
 import random
 import sys
 import time
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 # Configure logging
 logging.basicConfig(
@@ -205,11 +206,11 @@ class OBD2HexEncoder:
 class ELM327Server:
     """Asynchronous TCP server broadcasting SAE J1979 OBD-II hex frames."""
 
-    def __init__(self, host: str = "127.0.0.1", port: int = 8000, rate_hz: float = 10.0,
+    def __init__(self, host: Optional[str] = None, port: Optional[int] = None, rate_hz: Optional[float] = None,
                  inject_anomaly: bool = False, anomaly_type: str = "overheat"):
-        self.host = host
-        self.port = port
-        self.rate_hz = rate_hz
+        self.host = host or os.getenv("CARDIGNO_SIM_HOST", "127.0.0.1")
+        self.port = port or int(os.getenv("CARDIGNO_SIM_PORT", "8000"))
+        self.rate_hz = rate_hz or float(os.getenv("CARDIGNO_SIM_RATE_HZ", "10.0"))
         self.interval = 1.0 / rate_hz
         self.physics = VehiclePhysicsSimulator(inject_anomaly=inject_anomaly, anomaly_type=anomaly_type)
         self.clients: Set[asyncio.StreamWriter] = set()

@@ -3,6 +3,7 @@ CarDigno - High-Throughput SQLite WAL Telemetry Logger
 Stores structured vehicular time-series telemetry records in SQLite with WAL mode optimization.
 """
 
+import contextlib
 import logging
 import os
 import sqlite3
@@ -11,7 +12,11 @@ from typing import Dict, List, Optional, Any, Union
 
 logger = logging.getLogger("TelemetryLogger")
 
-DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "database", "telemetry.db")
+try:
+    from telemetry_core.config import settings
+    DEFAULT_DB_PATH = settings.DB_PATH
+except ImportError:
+    DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "database", "telemetry.db")
 
 
 class TelemetryLogger:
@@ -29,16 +34,20 @@ class TelemetryLogger:
         
         self._init_db()
 
-    def _get_connection(self) -> sqlite3.Connection:
-        """Returns a connection with WAL and timeout pragmas applied."""
+    @contextlib.contextmanager
+    def _get_connection(self):
+        """Yields a connection with WAL and timeout pragmas applied, closing it on exit."""
         conn = sqlite3.connect(self.db_path, timeout=10.0, check_same_thread=False)
         conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL;")
-        cursor.execute("PRAGMA synchronous=NORMAL;")
-        cursor.execute("PRAGMA busy_timeout=5000;")
-        cursor.close()
-        return conn
+        try:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL;")
+            cursor.execute("PRAGMA synchronous=NORMAL;")
+            cursor.execute("PRAGMA busy_timeout=5000;")
+            cursor.close()
+            yield conn
+        finally:
+            conn.close()
 
     def close(self):
         """Forces WAL checkpoint and connection cleanup."""
@@ -131,6 +140,66 @@ class TelemetryLogger:
                 )
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
+
+    def query_paginated(
+        self,
+        page: int = 1,
+        limit: int = 50,
+        pid: Optional[str] = None,
+        metric_name: Optional[str] = None,
+        start_time: Optional[float] = None,
+        end_time: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """Queries paginated telemetry logs with optional filtering."""
+        page = max(1, page)
+        limit = max(1, min(1000, limit))
+        offset = (page - 1) * limit
+
+        where_clauses = []
+        params: List[Any] = []
+
+        if pid:
+            where_clauses.append("pid = ?")
+            params.append(pid)
+        if metric_name:
+            where_clauses.append("metric_name = ?")
+            params.append(metric_name)
+        if start_time is not None:
+            where_clauses.append("timestamp >= ?")
+            params.append(float(start_time))
+        if end_time is not None:
+            where_clauses.append("timestamp <= ?")
+            params.append(float(end_time))
+
+        where_sql = (" WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+
+            # Count total matching rows
+            count_sql = f"SELECT COUNT(*) FROM telemetry_logs{where_sql};"
+            cursor.execute(count_sql, params)
+            total_records = cursor.fetchone()[0]
+
+            # Fetch page data
+            data_sql = (
+                f"SELECT id, timestamp, pid, metric_name, decoded_value, unit, raw_hex "
+                f"FROM telemetry_logs{where_sql} ORDER BY id DESC LIMIT ? OFFSET ?;"
+            )
+            cursor.execute(data_sql, params + [limit, offset])
+            rows = cursor.fetchall()
+            data = [dict(row) for row in rows]
+
+        total_pages = (total_records + limit - 1) // limit if total_records > 0 else 0
+
+        return {
+            "page": page,
+            "limit": limit,
+            "total_records": total_records,
+            "total_pages": total_pages,
+            "data": data,
+        }
+
 
     def get_latest_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Fetches the most recent record for each distinct PID."""
