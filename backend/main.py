@@ -89,7 +89,7 @@ async def lifespan(app_instance: FastAPI):
             logger.error(f"Error processing telemetry frame in orchestrator: {err}")
 
     # 4. Start Telemetry Receiver background task
-    receiver_instance = TelemetryReceiver(on_record_callback=handle_telemetry_record)
+    receiver_instance = TelemetryReceiver(port=9000, on_record_callback=handle_telemetry_record)
     receiver_task = asyncio.create_task(receiver_instance.start())
     logger.info("Successfully launched Telemetry Receiver and ML Intelligence Engine in background.")
 
