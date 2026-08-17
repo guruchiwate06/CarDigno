@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CarDigno Real-Time OBD-II Vehicular Telemetry, ML Anomaly Detection & Diagnostic Intelligence Dashboard">
+    <title>CarDigno - Real-Time Vehicle Intelligence Dashboard</title>
+
+    <!-- Google Fonts & Chart.js Library -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        
+        <!-- Header Bar -->
+        <header class="header-card">
+            <div class="brand-title">
+                <div class="brand-logo">🚗</div>
+                <div>
+                    <h1>CarDigno Intelligence Dashboard</h1>
+                    <div class="brand-subtitle">Real-Time SAE J1979 OBD-II Telemetry & Isolation Forest Diagnostic Gateway</div>
+                </div>
+            </div>
+
+            <div class="connection-status" id="ws-status">
+                <span class="status-dot disconnected" id="status-dot"></span>
+                <span id="status-text">Disconnected</span>
+            </div>
+        </header>
+
+        <!-- Metric Gauges Grid -->
+        <section class="metrics-grid" aria-label="Vehicle Sensor Telemetry Gauges">
+            
+            <!-- 1. Engine RPM Card -->
+            <article class="metric-card" id="card-rpm">
+                <div class="metric-header">
+                    <span class="metric-label">Engine Speed</span>
+                    <span class="metric-icon">⚙️</span>
+                </div>
+                <div class="metric-value-row">
+                    <span class="metric-value" id="val-rpm">0.0</span>
+                    <span class="metric-unit">RPM</span>
+                </div>
+                <div class="gauge-bar-bg">
+                    <div class="gauge-bar-fill" id="bar-rpm"></div>
+                </div>
+                <div class="metric-meta">
+                    <span>EMA (2s): <strong id="ema-rpm">0.0</strong> RPM</span>
+                    <span>Max 7000</span>
+                </div>
+            </article>
+
+            <!-- 2. Coolant Temperature Card -->
+            <article class="metric-card" id="card-temp">
+                <div class="metric-header">
+                    <span class="metric-label">Coolant Temp</span>
+                    <span class="metric-icon">🌡️</span>
+                </div>
+                <div class="metric-value-row">
+                    <span class="metric-value" id="val-temp">0.0</span>
+                    <span class="metric-unit">°C</span>
+                </div>
+                <div class="gauge-bar-bg">
+                    <div class="gauge-bar-fill" id="bar-temp"></div>
+                </div>
+                <div class="metric-meta">
+                    <span>EMA: <strong id="ema-temp">0.0</strong> °C</span>
+                    <span>Max 10s: <strong id="max-temp">0.0</strong> °C</span>
+                </div>
+            </article>
+
+            <!-- 3. Mass Air Flow Card -->
+            <article class="metric-card" id="card-maf">
+                <div class="metric-header">
+                    <span class="metric-label">Mass Air Flow</span>
+                    <span class="metric-icon">💨</span>
+                </div>
+                <div class="metric-value-row">
+                    <span class="metric-value" id="val-maf">0.00</span>
+                    <span class="metric-unit">g/s</span>
+                </div>
+                <div class="gauge-bar-bg">
+                    <div class="gauge-bar-fill" id="bar-maf"></div>
+                </div>
+                <div class="metric-meta">
+                    <span>Intake Ratio: <strong id="ratio-air">0.0000</strong></span>
+                    <span>EMA: <strong id="ema-maf">0.00</strong></span>
+                </div>
+            </article>
+
+            <!-- 4. Fuel Level Card -->
+            <article class="metric-card" id="card-fuel">
+                <div class="metric-header">
+                    <span class="metric-label">Fuel Level</span>
+                    <span class="metric-icon">⛽</span>
+                </div>
+                <div class="metric-value-row">
+                    <span class="metric-value" id="val-fuel">0.0</span>
+                    <span class="metric-unit">%</span>
+                </div>
+                <div class="gauge-bar-bg">
+                    <div class="gauge-bar-fill" id="bar-fuel"></div>
+                </div>
+                <div class="metric-meta">
+                    <span>Tank Capacity: 100%</span>
+                    <span>Status: Nominal</span>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- Middle Grid: 2D Chassis Vector & DTC Diagnostic Panel -->
+        <section class="middle-grid">
+            
+            <!-- 2D Vector Vehicle Chassis Schematic Card -->
+            <article class="panel-card">
+                <div class="panel-title-bar">
+                    <h2 class="panel-title">
+                        <span>🧩</span> 2D Spatial Subsystem Schematic
+                    </h2>
+                    <span class="system-pill healthy" id="overall-status-pill">HEALTHY</span>
+                </div>
+
+                <div class="schematic-wrapper" id="schematic-container">
+                    <svg class="vehicle-svg" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Vehicle Body Chassis Outline -->
+                        <path d="M 60 160 L 100 160 L 120 100 L 220 80 L 400 80 L 480 110 L 540 160 L 560 160 C 570 160 575 170 575 180 L 575 190 L 500 190 C 500 170 470 170 470 190 L 170 190 C 170 170 140 170 140 190 L 40 190 L 40 180 C 40 170 50 160 60 160 Z" 
+                              fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="3" stroke-dasharray="6,4"/>
+
+                        <!-- Wheels -->
+                        <circle cx="155" cy="190" r="24" fill="#1e293b" stroke="#475569" stroke-width="4"/>
+                        <circle cx="155" cy="190" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/>
+                        
+                        <circle cx="485" cy="190" r="24" fill="#1e293b" stroke="#475569" stroke-width="4"/>
+                        <circle cx="485" cy="190" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="2"/>
+
+                        <!-- 1. Radiator Component (#part-radiator) -->
+                        <rect id="part-radiator" class="chassis-part nominal" x="50" y="145" width="22" height="35" rx="4"
+                              fill="#10b981" opacity="0.85"/>
+                        <text x="61" y="135" font-size="10" fill="#94a3b8" text-anchor="middle" font-weight="600">Radiator</text>
+
+                        <!-- 2. Engine Block Component (#part-engine) -->
+                        <rect id="part-engine" class="chassis-part nominal" x="80" y="130" width="70" height="50" rx="6"
+                              fill="#10b981" opacity="0.85"/>
+                        <text x="115" y="120" font-size="11" fill="#f8fafc" text-anchor="middle" font-weight="700">Engine</text>
+
+                        <!-- 3. Air Intake Unit Component (#part-intake) -->
+                        <path id="part-intake" class="chassis-part nominal" d="M 80 140 Q 110 105 150 110 L 150 120 Q 115 115 88 145 Z"
+                              fill="#10b981" opacity="0.85"/>
+                        <text x="135" y="98" font-size="10" fill="#94a3b8" text-anchor="middle" font-weight="600">Air Intake</text>
+
+                        <!-- Exhaust Pipe & Cockpit -->
+                        <path d="M 150 170 L 530 170" stroke="rgba(255, 255, 255, 0.1)" stroke-width="3"/>
+                        <path d="M 230 90 L 390 90 L 460 115 L 210 115 Z" fill="rgba(56, 189, 248, 0.08)" stroke="rgba(56, 189, 248, 0.2)" stroke-width="1"/>
+                    </svg>
+                </div>
+
+                <!-- Subsystem Health Ratings Breakdown -->
+                <div class="subsystem-health-bars">
+                    <div class="health-item">
+                        <div class="health-item-label">
+                            <span>Thermal Subsystem Health</span>
+                            <strong id="health-thermal-val">100.0%</strong>
+                        </div>
+                        <div class="gauge-bar-bg">
+                            <div class="gauge-bar-fill nominal" id="health-thermal-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="health-item">
+                        <div class="health-item-label">
+                            <span>Air Intake Subsystem Health</span>
+                            <strong id="health-air-val">100.0%</strong>
+                        </div>
+                        <div class="gauge-bar-bg">
+                            <div class="gauge-bar-fill nominal" id="health-air-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="health-item">
+                        <div class="health-item-label">
+                            <span>Overall Vehicular Health</span>
+                            <strong id="health-overall-val">100.0%</strong>
+                        </div>
+                        <div class="gauge-bar-bg">
+                            <div class="gauge-bar-fill nominal" id="health-overall-bar" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="health-item">
+                        <div class="health-item-label">
+                            <span>ML Anomaly Score (Isolation Forest)</span>
+                            <strong id="anom-score-val">0.050</strong>
+                        </div>
+                        <div class="gauge-bar-bg">
+                            <div class="gauge-bar-fill nominal" id="anom-score-bar" style="width: 5%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Active Diagnostic Trouble Codes (DTCs) Card -->
+            <article class="panel-card" id="dtc-panel">
+                <div class="panel-title-bar">
+                    <h2 class="panel-title">
+                        <span>⚠️</span> Active Diagnostic Trouble Codes (SAE J2012)
+                    </h2>
+                </div>
+
+                <div class="dtc-list" id="dtc-list">
+                    <div class="dtc-empty">
+                        <span style="font-size: 2rem;">✔</span>
+                        <span>All vehicle subsystems operating nominally. No active DTCs.</span>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- Bottom Chart Panel -->
+        <section class="chart-card">
+            <div class="panel-title-bar">
+                <h2 class="panel-title">
+                    <span>📈</span> Real-Time Telemetry Stream (20-Sample Window)
+                </h2>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="telemetry-chart"></canvas>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Main Module Orchestrator -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

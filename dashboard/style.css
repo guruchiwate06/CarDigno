@@ -1,0 +1,518 @@
+/* ==========================================================================
+   CarDigno - Real-Time Vehicle Intelligence Dashboard Theme & Styles
+   Modern Dark Glassmorphism Design System with Dynamic State Colors
+   ========================================================================== */
+
+:root {
+    --bg-base: #0a0e17;
+    --bg-card: rgba(16, 24, 40, 0.75);
+    --bg-card-hover: rgba(24, 34, 56, 0.85);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-color-glow: rgba(56, 189, 248, 0.3);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    /* Subsystem State Colors */
+    --color-nominal: #10b981;
+    --color-nominal-glow: rgba(16, 185, 129, 0.3);
+    --color-warning: #f59e0b;
+    --color-warning-glow: rgba(245, 158, 11, 0.3);
+    --color-anomaly: #ef4444;
+    --color-anomaly-glow: rgba(239, 68, 68, 0.4);
+
+    --color-accent-blue: #38bdf8;
+    --color-accent-purple: #818cf8;
+    --color-accent-cyan: #06b6d4;
+
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --border-radius-sm: 8px;
+    --border-radius-md: 14px;
+    --border-radius-lg: 20px;
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-base);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.05) 0px, transparent 50%);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.5;
+}
+
+.dashboard-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ==========================================================================
+   Header Section
+   ========================================================================== */
+.header-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-glass);
+}
+
+.brand-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-logo {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.4);
+}
+
+.brand-title h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, #ffffff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.brand-subtitle {
+    font-size: 0.825rem;
+    color: var(--text-muted);
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    transition: var(--transition-fast);
+}
+
+.status-dot.connected {
+    background-color: var(--color-nominal);
+    box-shadow: 0 0 12px var(--color-nominal-glow);
+    animation: pulse-dot 2s infinite;
+}
+
+.status-dot.disconnected {
+    background-color: var(--color-anomaly);
+    box-shadow: 0 0 12px var(--color-anomaly-glow);
+}
+
+.status-dot.connecting {
+    background-color: var(--color-warning);
+    animation: pulse-dot 1s infinite;
+}
+
+@keyframes pulse-dot {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* ==========================================================================
+   Metrics Grid (Gauges Cards)
+   ========================================================================== */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.metric-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: var(--shadow-glass);
+    transition: var(--transition-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card:hover {
+    border-color: var(--border-color-glow);
+    transform: translateY(-2px);
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-accent-blue), transparent);
+    opacity: 0.7;
+}
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.metric-icon {
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+.metric-value-row {
+    display: flex;
+    align-baseline: flex-end;
+    gap: 8px;
+}
+
+.metric-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.metric-unit {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.metric-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.775rem;
+    color: var(--text-muted);
+}
+
+.gauge-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.gauge-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-accent-blue), var(--color-accent-purple));
+    border-radius: 4px;
+    transition: width var(--transition-medium), background-color var(--transition-medium);
+}
+
+/* Gauge Color States */
+.gauge-bar-fill.nominal { background: var(--color-nominal); }
+.gauge-bar-fill.warning { background: var(--color-warning); }
+.gauge-bar-fill.critical { background: var(--color-anomaly); }
+
+/* ==========================================================================
+   Middle Grid: Schematic & DTC Panel
+   ========================================================================== */
+.middle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 1024px) {
+    .middle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.panel-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: var(--shadow-glass);
+}
+
+.panel-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.panel-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.system-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.system-pill.healthy {
+    background: var(--color-nominal-glow);
+    color: var(--color-nominal);
+    border: 1px solid var(--color-nominal);
+}
+
+.system-pill.warning {
+    background: var(--color-warning-glow);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+.system-pill.critical {
+    background: var(--color-anomaly-glow);
+    color: var(--color-anomaly);
+    border: 1px solid var(--color-anomaly);
+    animation: pulse-pill 1.5s infinite;
+}
+
+@keyframes pulse-pill {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* 2D Vehicle Schematic SVG Styling */
+.schematic-wrapper {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 10px;
+}
+
+.vehicle-svg {
+    width: 100%;
+    height: 100%;
+    max-height: 220px;
+}
+
+/* SVG Part Fills & Smooth Transitions */
+.chassis-part {
+    transition: fill var(--transition-medium), filter var(--transition-medium);
+}
+
+.chassis-part.nominal {
+    fill: var(--color-nominal);
+    filter: drop-shadow(0 0 6px var(--color-nominal-glow));
+}
+
+.chassis-part.warning {
+    fill: var(--color-warning);
+    filter: drop-shadow(0 0 8px var(--color-warning-glow));
+}
+
+.chassis-part.critical {
+    fill: var(--color-anomaly);
+    filter: drop-shadow(0 0 12px var(--color-anomaly-glow));
+    animation: pulse-part 1s infinite alternate;
+}
+
+@keyframes pulse-part {
+    from { opacity: 0.7; }
+    to { opacity: 1; }
+}
+
+.subsystem-health-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.health-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.health-item-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* DTC Alert List */
+.dtc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.dtc-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 20px;
+    color: var(--color-nominal);
+    gap: 10px;
+    font-size: 0.9rem;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px dashed rgba(16, 185, 129, 0.3);
+    border-radius: var(--border-radius-sm);
+}
+
+.dtc-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 4px solid var(--color-warning);
+    border-radius: var(--border-radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: var(--transition-fast);
+}
+
+.dtc-card.critical {
+    border-left-color: var(--color-anomaly);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.dtc-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dtc-code {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.dtc-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.dtc-badge.critical {
+    background: var(--color-anomaly);
+    color: white;
+}
+
+.dtc-badge.warning {
+    background: var(--color-warning);
+    color: black;
+}
+
+.dtc-desc {
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+}
+
+.dtc-action {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ==========================================================================
+   Bottom Panel: Chart.js Canvas
+   ========================================================================== */
+.chart-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: var(--shadow-glass);
+}
+
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 320px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
